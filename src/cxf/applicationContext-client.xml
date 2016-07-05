@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://cxf.apache.org/jaxws 
+    http://cxf.apache.org/schemas/jaxws.xsd">
+    <!-- 
+        ***注意*** 
+        手动添加的内容：
+        xmlns:jaxws="http://cxf.apache.org/jaxws"
+        http://cxf.apache.org/jaxws 
+        http://cxf.apache.org/schemas/jaxws.xsd"
+     -->
+    
+    <import resource="classpath:META-INF/cxf/cxf.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+
+    <!-- <bean id="client" class="cxf.service.IHelloService" factory-bean="clientFactory" factory-method="create" />
+    <bean id="clientFactory" class="org.apache.cxf.jaxws.JaxWsProxyFactoryBean">
+        <property name="serviceClass" value="cxf.service.IHelloService" />
+        <property name="address" value="http://localhost:8080/cxf/ws/sayHelloServiceImpl" />
+    </bean> -->
+    
+    <bean id="loggingOutInterceptor" class="org.apache.cxf.interceptor.LoggingOutInterceptor"/>
+    <!-- <bean id="authInterceptor" class="cxf.client.service.authinterceptor.AuthInterceptor">
+         	通过setter设置参数值   需要类中有无参构造方法
+    	<property name="username" value="admin"/>
+    	<property name="password" value="0"/>
+		初始化带参数的构造器创建对象
+    	<constructor-arg index="0">
+    		<value>admin</value>
+    	</constructor-arg>
+    	<constructor-arg index="1">
+    		<value>0</value>
+    	</constructor-arg>
+    </bean> -->
+    <jaxws:client id="client" serviceClass="cxf.client.service.cxf.service.HelloWs" address="http://localhost:8080/ws/sayHelloServiceImpl">
+    	<jaxws:outInterceptors>
+    		<ref bean="loggingOutInterceptor"/>
+<!--     		<ref bean="authInterceptor"/> -->
+    	</jaxws:outInterceptors>    
+    </jaxws:client>
+    
+</beans>

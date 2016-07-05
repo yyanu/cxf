@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xmlns:jaxrs="http://cxf.apache.org/jaxrs" 
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-2.5.xsd
+    http://cxf.apache.org/jaxws 
+    http://cxf.apache.org/schemas/jaxws.xsd
+    http://cxf.apache.org/jaxrs
+    http://cxf.apache.org/schemas/jaxrs.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd">
+     
+    <import resource="classpath:META-INF/cxf/cxf.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+    <context:component-scan base-package="cxf.service"/>
+    
+    <bean id="helloWsDaoImpl" class="cxf.dao.impl.HelloWsDaoImpl"/>
+    <bean id="serviceBean" class="cxf.service.HelloServiceImpl">
+    	<property name="helloWsDao" ref="helloWsDaoImpl"/>
+    </bean>
+    <bean id="loggingInInterceptor" class="org.apache.cxf.interceptor.LoggingInInterceptor"/>
+    <bean id="authInterceptor" class="cxf.service.interceptor.AuthInterceptor"/>
+    <bean id="serverPasswordCallback" class="cxf.service.callback.ServerPasswordCallbackHandler"/>
+      <bean id="wss4jInInterceptor" class="org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor">
+    	<constructor-arg>
+    		<map>
+    			<entry key="action" value="UsernameToken"/>
+<!--                  密码类型，PasswordText表示明文 -->
+                <entry key="passwordType" value="PasswordText"/>
+                <entry key="passwordCallbackRef">
+<!--                      回调函数引用 -->
+                     <ref bean="serverPasswordCallback"/>
+                </entry>
+    		</map>
+    	</constructor-arg>
+    </bean>
+    <jaxws:server id="sayHelloServiceImpl" serviceClass="cxf.service.IHelloService"
+     address="/sayHelloServiceImpl">
+    	<jaxws:serviceBean>
+    		<ref bean="serviceBean"/>
+    	</jaxws:serviceBean>
+    	<jaxws:inInterceptors>
+    		<ref bean="loggingInInterceptor"/>
+<!--     		<ref bean="authInterceptor"/> -->
+    		<ref bean="wss4jInInterceptor"/>
+    	</jaxws:inInterceptors>
+    	<jaxws:properties>
+    		<entry key="mtom_enabled" value="true"></entry>
+    	</jaxws:properties>
+    </jaxws:server>
+    
+	<!-- http://localhost:8080/cxf/ws/sayHelloServiceImpl?wsdl发布地址 -->
+<!--     <jaxws:endpoint id="sayHelloServiceImpl" implementor="cxf.service.HelloServiceImpl" address="/sayHelloServiceImpl" /> -->
+      
+  <!--   <bean id="libraryServiceBean" class="cxf.service.jaxrs.LibraryService"/>
+    <jaxrs:server id="libraryServer" address="/">
+    	<jaxrs:serviceBeans>
+			<ref bean="libraryServiceBean"/>    	
+    	</jaxrs:serviceBeans>
+    </jaxrs:server> -->
+    
+</beans>
